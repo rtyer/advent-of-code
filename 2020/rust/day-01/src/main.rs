@@ -1,5 +1,5 @@
+use std::collections::HashMap;
 use std::time::Instant;
-use std::collections::{HashMap};
 
 type AnyError = Box<dyn std::error::Error>;
 type Result<T> = std::result::Result<T, AnyError>;
@@ -10,11 +10,12 @@ fn main() -> Result<()> {
 
     let path = "./input/input.txt";
     let numbers = read_input(path)?;
-    let numbers2 = numbers.to_vec();
     let numbers_map = read_input_map(path)?;
+    let numbers_map_two = numbers_map.clone();
 
     let start = Instant::now();
-
+    println!("----------------------------------");
+    println!("Part One");
     println!("----------------------------------");
 
     let solution = simple(numbers);
@@ -25,25 +26,25 @@ fn main() -> Result<()> {
 
     println!("----------------------------------");
 
-    let start2 = Instant::now();
+    let start_complements = Instant::now();
 
-    let solution2 = complements(numbers2);
-    println!("Complements Solution: {}", solution2);
+    let complements_solution = complements(numbers_map);
+    println!("Complements Solution: {}", complements_solution);
 
-    let duration2 = start2.elapsed();
-    println!("Time: {}µs", duration2.as_micros());
-
-    println!("----------------------------------");
-
-    let start3 = Instant::now();
-
-    let solution3 = complements_v2(numbers_map);
-    println!("Complements Solution: {}", solution3);
-
-    let duration3 = start3.elapsed();
-    println!("Time: {}µs", duration3.as_micros());
+    let duration_complements = start_complements.elapsed();
+    println!("Time: {}µs", duration_complements.as_micros());
 
     println!("----------------------------------");
+    println!("Part Two");
+    println!("----------------------------------");
+    let start_part_two = Instant::now();
+
+    let part_two_solution = part_two(numbers_map_two);
+    println!("Complements Solution: {}", part_two_solution);
+
+    let duration_part_two = start_part_two.elapsed();
+    println!("Time: {}µs", duration_part_two.as_micros());
+
     Ok(())
 }
 
@@ -77,19 +78,10 @@ fn simple(numbers: Vec<usize>) -> usize {
     panic!("solution not found")
 }
 
-fn complements(numbers: Vec<usize>) -> usize {
-    // loop through once, identifying the necessary second number to make 2020 for each number
-    // loop through a second time, seeking a match, using contains
-    // could be faster to use hash sets and intersection...sets in general would be wise to use instead /shrug
-    let mut complements: Vec<usize> = Vec::new();
-
-    for x in 0..numbers.len() {
-        complements.push(2020 - numbers[x]);
-    }
-
-    for num in numbers {
-        if complements.contains(&num) {
-            let other_num = 2020 - num;
+fn complements(numbers: HashMap<usize, usize>) -> usize {
+    for num in numbers.keys() {
+        let other_num = 2020 - num;
+        if numbers.contains_key(&other_num) {
             println!("Identified {} and {}", num, other_num);
 
             return num * other_num;
@@ -99,16 +91,18 @@ fn complements(numbers: Vec<usize>) -> usize {
     panic!("No solution");
 }
 
-fn complements_v2(numbers: HashMap<usize, usize>) -> usize {
-    // switched to a map and optimized to a single pass
-
+fn part_two(numbers: HashMap<usize, usize>) -> usize {
     for num in numbers.keys() {
-        let other_num = 2020 - num;
-        if numbers.contains_key(&other_num) {
-            let other_num = 2020 - num;
-            println!("Identified {} and {}", num, other_num);
+        let remainder_sum = 2020 - num;
+        for num2 in numbers.keys() {
+            if num2 != num && &remainder_sum > num2 { //verifying remainder greater than sum due to unsigned ints
+                let other_num = remainder_sum - num2;
+                if numbers.contains_key(&other_num) {
+                    println!("Identified {} and {} and {}", num, num2, other_num);
 
-            return num * other_num;
+                    return num * other_num * num2;
+                }
+            }
         }
     }
 
@@ -126,14 +120,16 @@ mod tests {
     }
 
     #[test]
-    fn test_example_input_complements() {
-        let solution = complements(read_input("./input/example.txt").unwrap());
+    fn test_example_input_complements_v2() {
+        let solution = complements(read_input_map("./input/example.txt").unwrap());
         assert_eq!(solution, 514579)
     }
 
     #[test]
-    fn test_example_input_complements_v2() {
-        let solution = complements_v2(read_input_map("./input/example.txt").unwrap());
-        assert_eq!(solution, 514579)
+    fn test_example_input_part_two() {
+        let map = read_input_map("./input/example.txt").unwrap();
+
+        let solution = part_two(map);
+        assert_eq!(solution, 241861950);
     }
 }
