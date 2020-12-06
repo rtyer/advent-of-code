@@ -11,10 +11,8 @@ fn main() -> Result<()> {
     let path = "./input/input.txt";
     let numbers = read_input(path)?;
     let numbers2 = numbers.to_vec();
-    let mut numbers_map:HashMap<usize, usize> = HashMap::new();
-    for x in 0..numbers.len() {
-        numbers_map.insert(numbers[x], numbers[x]);
-    }
+    let numbers_map = read_input_map(path)?;
+
     let start = Instant::now();
 
     println!("----------------------------------");
@@ -56,6 +54,15 @@ fn read_input(path: &str) -> Result<Vec<usize>> {
         .collect()
 }
 
+fn read_input_map(path: &str) -> Result<HashMap<usize, usize>> {
+    let numbers = read_input(path)?;
+    let mut numbers_map: HashMap<usize, usize> = HashMap::new();
+    for x in 0..numbers.len() {
+        numbers_map.insert(numbers[x], numbers[x]);
+    }
+    return Ok(numbers_map);
+}
+
 fn simple(numbers: Vec<usize>) -> usize {
     //loop through the numbers, checking each other number to see if it sums to 2020
     //n squared
@@ -82,7 +89,7 @@ fn complements(numbers: Vec<usize>) -> usize {
 
     for num in numbers {
         if complements.contains(&num) {
-            let other_num = 2020-num;
+            let other_num = 2020 - num;
             println!("Identified {} and {}", num, other_num);
 
             return num * other_num;
@@ -92,13 +99,13 @@ fn complements(numbers: Vec<usize>) -> usize {
     panic!("No solution");
 }
 
-fn complements_v2(numbers: HashMap<usize, usize>) ->usize {
+fn complements_v2(numbers: HashMap<usize, usize>) -> usize {
     // switched to a map and optimized to a single pass
 
     for num in numbers.keys() {
-        let other_num = 2020-num;
+        let other_num = 2020 - num;
         if numbers.contains_key(&other_num) {
-            let other_num = 2020-num;
+            let other_num = 2020 - num;
             println!("Identified {} and {}", num, other_num);
 
             return num * other_num;
@@ -113,8 +120,20 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_input() {
+    fn test_example_input_simple() {
         let solution = simple(read_input("./input/example.txt").unwrap());
+        assert_eq!(solution, 514579)
+    }
+
+    #[test]
+    fn test_example_input_complements() {
+        let solution = complements(read_input("./input/example.txt").unwrap());
+        assert_eq!(solution, 514579)
+    }
+
+    #[test]
+    fn test_example_input_complements_v2() {
+        let solution = complements_v2(read_input_map("./input/example.txt").unwrap());
         assert_eq!(solution, 514579)
     }
 }
