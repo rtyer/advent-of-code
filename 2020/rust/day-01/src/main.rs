@@ -1,4 +1,5 @@
 use std::time::Instant;
+use std::collections::{HashMap};
 
 type AnyError = Box<dyn std::error::Error>;
 type Result<T> = std::result::Result<T, AnyError>;
@@ -10,7 +11,10 @@ fn main() -> Result<()> {
     let path = "./input/input.txt";
     let numbers = read_input(path)?;
     let numbers2 = numbers.to_vec();
-
+    let mut numbers_map:HashMap<usize, usize> = HashMap::new();
+    for x in 0..numbers.len() {
+        numbers_map.insert(numbers[x], numbers[x]);
+    }
     let start = Instant::now();
 
     println!("----------------------------------");
@@ -30,6 +34,16 @@ fn main() -> Result<()> {
 
     let duration2 = start2.elapsed();
     println!("Time: {}µs", duration2.as_micros());
+
+    println!("----------------------------------");
+
+    let start3 = Instant::now();
+
+    let solution3 = complements_v2(numbers_map);
+    println!("Complements Solution: {}", solution3);
+
+    let duration3 = start3.elapsed();
+    println!("Time: {}µs", duration3.as_micros());
 
     println!("----------------------------------");
     Ok(())
@@ -57,6 +71,9 @@ fn simple(numbers: Vec<usize>) -> usize {
 }
 
 fn complements(numbers: Vec<usize>) -> usize {
+    // loop through once, identifying the necessary second number to make 2020 for each number
+    // loop through a second time, seeking a match, using contains
+    // could be faster to use hash sets and intersection...sets in general would be wise to use instead /shrug
     let mut complements: Vec<usize> = Vec::new();
 
     for x in 0..numbers.len() {
@@ -65,6 +82,22 @@ fn complements(numbers: Vec<usize>) -> usize {
 
     for num in numbers {
         if complements.contains(&num) {
+            let other_num = 2020-num;
+            println!("Identified {} and {}", num, other_num);
+
+            return num * other_num;
+        }
+    }
+
+    panic!("No solution");
+}
+
+fn complements_v2(numbers: HashMap<usize, usize>) ->usize {
+    // switched to a map and optized to a single pass
+
+    for num in numbers.keys() {
+        let other_num = 2020-num;
+        if numbers.contains_key(&other_num) {
             let other_num = 2020-num;
             println!("Identified {} and {}", num, other_num);
 
