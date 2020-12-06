@@ -93,7 +93,7 @@ fn complements(numbers: Vec<usize>) -> usize {
 }
 
 fn complements_v2(numbers: HashMap<usize, usize>) ->usize {
-    // switched to a map and optized to a single pass
+    // switched to a map and optimized to a single pass
 
     for num in numbers.keys() {
         let other_num = 2020-num;
